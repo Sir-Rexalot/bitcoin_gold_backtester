@@ -1,48 +1,32 @@
 # Bitcoin & Gold Allocation Portfolio Backtester
 
-This project allows users to simulate historical backtests of multi-asset portfolios with user-defined allocations to Bitcoin (BTC) and Gold (GLD), layered on top of a traditional 60/40 portfolio (SPY/AGG). It includes a command-line version and a Streamlit GUI version.
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://bitcoingold.streamlit.app)
 
-## Features
+This Streamlit web app allows users to run historical backtests of multi-asset portfolios that combine traditional 60/40 allocations with custom Bitcoin (BTC) and Gold (GLD) exposures.
 
-- User-defined BTC and GLD allocations
-- Control over whether allocations are drawn from equities or fixed income
-- Optional inclusion of standard 60/40 benchmark
-- Performance summary with Sharpe and Sortino ratios
-- Interactive Plotly visualization with annotations
-- Export of results to Excel
+---
 
-## Requirements
+## 📊 Features
 
-Install required libraries using:
+- Adjustable BTC and GLD allocation for two custom portfolios
+- Slider control over equity/fixed income funding source
+- Benchmark comparison with traditional 60/40
+- Performance metrics: Total Return, Drawdown, Sharpe & Sortino ratios
+- Interactive Plotly chart (dark mode, annotation ready)
+- Asset allocation tables and Excel export support
+- Deployed to Streamlit Cloud – no coding required to use
+
+---
+
+## 🚀 Live App
+
+👉 [Launch the app now](https://bitcoingold.streamlit.app)
+
+---
+
+## ⚙️ Requirements (for local use)
+
+If you'd like to run this locally in Python:
 
 ```bash
 pip install -r requirements.txt
-```
-
-## Running the Script
-
-```bash
-python bitcoin_gold_backtester.py
-```
-
-## Streamlit Version (Optional)
-
-If you have the Streamlit version:
-
-```bash
-streamlit run bitcoin_gold_backtester.py
-```
-
-## Output
-
-- Excel file: `portfolio_backtest_results.xlsx`
-- Plotly interactive chart
-- Terminal summary of portfolio performance and allocations
-
-## Author
-
-James Birrell
-
-## License
-
-MIT License
