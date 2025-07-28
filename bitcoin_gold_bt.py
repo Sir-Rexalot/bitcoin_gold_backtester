@@ -1,10 +1,6 @@
 # ============================================================
 # Streamlit Portfolio Backtest App with BTC and GLD Allocation (2016–2025)
 # Author: James Birrell
-# Description: Streamlit GUI version includes sliders for BTC/GLD allocations,
-#              control over funding source (equities/fixed income),
-#              interactive Plotly chart, Sortino Ratio, allocation tables,
-#              and Excel export functionality.
 # ============================================================
 
 import streamlit as st
@@ -12,6 +8,7 @@ import pandas as pd
 import numpy as np
 import yfinance as yf
 import plotly.graph_objs as go
+import io
 
 st.set_page_config(page_title="Portfolio Backtest", layout="wide")
 
@@ -91,6 +88,9 @@ for name, w in portfolios.items():
 # Performance Summary
 # ---------------------------
 def performance_summary(pval, pret):
+    if len(pval) < 2:
+        return np.nan, np.nan, np.nan, np.nan, np.nan, np.nan
+
     total = pval.iloc[-1] / pval.iloc[0] - 1
     annual = (1 + total) ** (252 / len(pval)) - 1
     maxdd = ((pval / pval.cummax()) - 1).min()
@@ -106,8 +106,11 @@ summary_df = pd.DataFrame(
     index=portfolios.keys()
 ).round(4)
 
+# Highlight the best portfolio
+highlight_max = summary_df.style.highlight_max(axis=0, color='lightgreen')
+
 # ---------------------------
-# Display Tables and Chart
+# Display Tables and Charts
 # ---------------------------
 col1, col2 = st.columns([1.5, 1])
 
@@ -124,7 +127,14 @@ with col1:
 
 with col2:
     st.subheader("Performance Summary")
-    st.dataframe(summary_df)
+    st.dataframe(highlight_max)
+
+st.subheader("Sharpe vs Sortino Ratio")
+st.plotly_chart(go.Figure([
+    go.Scatter(x=summary_df['Sharpe Ratio'], y=summary_df['Sortino Ratio'], mode='markers+text',
+               text=summary_df.index, textposition='top center', marker=dict(size=12))
+]).update_layout(title="Risk-Adjusted Return Comparison",
+                xaxis_title="Sharpe Ratio", yaxis_title="Sortino Ratio"), use_container_width=True)
 
 st.subheader("Asset Allocations")
 st.dataframe(alloc_df.round(3))
@@ -133,11 +143,14 @@ st.dataframe(alloc_df.round(3))
 # Export Option
 # ---------------------------
 with st.expander("Export to Excel"):
-    if st.button("Download Excel File"):
-        with pd.ExcelWriter("portfolio_backtest_results.xlsx") as writer:
-            data.to_excel(writer, sheet_name='Price Data')
-            returns.to_excel(writer, sheet_name='Daily Returns')
-            pd.DataFrame(port_vals).to_excel(writer, sheet_name='Portfolio Values')
-            summary_df.to_excel(writer, sheet_name='Performance Summary')
-            alloc_df.to_excel(writer, sheet_name='Asset Allocations')
-        st.success("Exported as portfolio_backtest_results.xlsx")
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        data.to_excel(writer, sheet_name='Price Data')
+        returns.to_excel(writer, sheet_name='Daily Returns')
+        pd.DataFrame(port_vals).to_excel(writer, sheet_name='Portfolio Values')
+        summary_df.to_excel(writer, sheet_name='Performance Summary')
+        alloc_df.to_excel(writer, sheet_name='Asset Allocations')
+    st.download_button(label="Download Excel File",
+                       data=output.getvalue(),
+                       file_name="portfolio_backtest_results.xlsx",
+                       mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
